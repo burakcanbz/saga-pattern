@@ -1,18 +1,46 @@
 #!/bin/bash
 # ---------------------------------------------
-# Mikroservisleri Arka Planda Başlatma Betiği
+# Mikroservisleri Build ve Başlatma Betiği
 # ---------------------------------------------
 
 # Proje adları ve JAR yolları
-ORDER_JAR="./order/target/order-0.0.1-SNAPSHOT.jar"
-PRODUCT_JAR="./product/target/product-0.0.1-SNAPSHOT.jar"
-USER_JAR="./user/target/user-0.0.1-SNAPSHOT.jar"
-AUTH_JAR="./auth/target/auth-0.0.1-SNAPSHOT.jar"
-NOTIFICATION_JAR="./notification/target/notification-0.0.1-SNAPSHOT.jar"
-INVENTORY_JAR="./inventory/target/inventory-0.0.1-SNAPSHOT.jar"
+SERVICES=(
+    "order:./order/target/order-0.0.1-SNAPSHOT.jar"
+    "product:./product/target/product-0.0.1-SNAPSHOT.jar"
+    "user:./user/target/user-0.0.1-SNAPSHOT.jar"
+    "auth:./auth/target/auth-0.0.1-SNAPSHOT.jar"
+    "notification:./notification/target/notification-0.0.1-SNAPSHOT.jar"
+    "inventory:./inventory/target/inventory-0.0.1-SNAPSHOT.jar"
+    "gateway:./gateway/target/gateway-0.0.1-SNAPSHOT.jar"
+)
 
 mkdir -p logs
 rm -f logs/*.log
+
+echo "=========================================="
+echo "BUILD BAŞLANIYOR..."
+echo "=========================================="
+
+# Her servis için build yap
+for SERVICE in "${SERVICES[@]}"; do
+    IFS=':' read -r NAME JAR_PATH <<< "$SERVICE"
+    SERVICE_DIR="./${NAME}"
+
+    if [ -d "$SERVICE_DIR" ]; then
+        echo "📦 ${NAME} build ediliyor..."
+        cd "$SERVICE_DIR"
+        mvn clean package -DskipTests
+        cd ..
+        echo "✓ ${NAME} build tamamlandı"
+    else
+        echo "❌ ${NAME} klasörü bulunamadı"
+    fi
+done
+
+echo ""
+echo "=========================================="
+echo "SERVISLER BAŞLATILIYOR..."
+echo "=========================================="
 
 start_service() {
     SERVICE_NAME=$1
@@ -21,34 +49,33 @@ start_service() {
 
     if [ ! -f "$JAR_PATH" ]; then
         echo "❌ HATA: ${SERVICE_NAME} JAR dosyası bulunamadı: ${JAR_PATH}"
-        echo "Lütfen önce tüm servisleri Maven ile paketleyin: mvn clean package"
         return 1
     fi
 
     echo "▶️ ${SERVICE_NAME} başlatılıyor... (Log: ${LOG_FILE})"
-    # nohup: Çıkış yapsanız bile çalışmaya devam et
-    # > log.txt 2>&1: stdout ve stderr'yi log dosyasına yönlendir
-    # &: Arka planda çalıştır
     nohup java -jar "$JAR_PATH" > "$LOG_FILE" 2>&1 &
-    echo "   PID: $!" # İşlem ID'sini (PID) yazdır
+    echo "   PID: $!"
+    sleep 1
 }
 
 # Tüm servisleri başlat
-start_service "Order-Service" "$ORDER_JAR"
-start_service "Product-Service" "$PRODUCT_JAR"
-start_service "User-Service" "$USER_JAR"
-start_service "Auth-Service" "$AUTH_JAR"
-start_service "Inventory-Service" "$INVENTORY_JAR"
-start_service "Notification-Service" "$NOTIFICATION_JAR"
+for SERVICE in "${SERVICES[@]}"; do
+    IFS=':' read -r NAME JAR_PATH <<< "$SERVICE"
+    SERVICE_NAME=$(echo "${NAME}" | sed 's/.*/\u&/')-Service
+    start_service "$SERVICE_NAME" "$JAR_PATH"
+done
 
-echo "--------------------------------------------------------"
-echo "Tüm başlatma komutları gönderildi."
+echo ""
+echo "=========================================="
+echo "Tüm servisler başlatıldı!"
+echo "=========================================="
+sleep 3
 
-# Servislerin başlaması için kısa bir bekleme
-sleep 5
+echo "Çalışan Java işlemleri:"
+pgrep -f "java -jar" | xargs -r ps -f -o pid,user,cmd
 
-echo "--------------------------------------------------------"
-echo "Çalışan Java işlemleri (PID, Kullanıcı, Komut):"
-pgrep -f "java -jar" | xargs -r ps -f -o pid,user,cmd | grep -E "(order|user|auth|fourth)"
-echo "--------------------------------------------------------"
-echo "Logları kontrol etmek için: tail -f logs/Order-Service.log"
+echo ""
+echo "Log dosyalarını kontrol etmek için:"
+echo "  tail -f logs/Order-Service.log"
+echo "  tail -f logs/Gateway-Service.log"
+echo "=========================================="

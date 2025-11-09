@@ -1,22 +1,19 @@
-package com.example.inventory.entity;
+package com.example.product.dto;
 
-import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name="inventory")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Inventory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class ProductCreatedEventDTO {
 
     private Long productId;
     private String category;
     private Integer quantity;
+
 }

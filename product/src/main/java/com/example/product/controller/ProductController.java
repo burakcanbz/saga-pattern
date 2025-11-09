@@ -3,8 +3,13 @@ package com.example.product.controller;
 
 import com.example.product.dto.CreateProductDTO;
 import com.example.product.dto.UpdateProductDTO;
+import com.example.product.entity.Product;
 import com.example.product.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,8 +30,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public String createProduct(@RequestBody CreateProductDTO createProductDTO) {
-        return "create product";
+    public ResponseEntity<String> createProduct(@Valid @RequestBody CreateProductDTO createProductDTO) {
+        try{
+            Product product = productService.createProduct(createProductDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(product.toString() + " created successfully");
+        }
+        catch(Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping

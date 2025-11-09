@@ -7,7 +7,7 @@ echo "Tüm çalışan Spring Boot servisleri aranıyor ve sonlandırılıyor..."
 
 # Durdurulacak servislerin isim desenleri
 # Örnek: (order|user|product|auth)
-SERVICE_PATTERNS="(order|user|product|auth|notification|inventory)"
+SERVICE_PATTERNS="(order|user|product|auth|notification|inventory|gateway)"
 
 # Çalışan tüm Java işlemlerini (ps aux) listele, kendi betiğimizi (grep) dışla.
 # JAR dosyası yürütenleri filtrele ve sadece servis desenlerimizle eşleşenleri al.

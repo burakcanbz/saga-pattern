@@ -1,20 +1,18 @@
-package com.example.inventory.entity;
+package com.example.inventory.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.io.Serializable;
 
-@Entity
-@Table(name="inventory")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Inventory {
+public class ProductCreatedEventDTO implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private static final long serialVersionUID = 1L;
 
     private Long productId;
     private String category;

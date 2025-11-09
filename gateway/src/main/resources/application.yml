@@ -1,0 +1,62 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      routes:
+        # Auth - Protected de?il
+        - id: auth_route
+          uri: http://localhost:8084
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+
+        # Protected routes - AuthorizationFilter ekle
+        - id: order_route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=1
+            - AuthorizationFilter
+
+        - id: product_route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=1
+            - AuthorizationFilter
+
+        - id: inventory_route
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
+            - AuthorizationFilter
+
+        - id: user_route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=1
+            - AuthorizationFilter
+
+        - id: notification_route
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1
+            - AuthorizationFilter
+
+jwt:
+  secret:
+    key: MTIzNDU2NzgxMjM0NTY3ODEyMzQ1Njc4MTIzNDU2NzgxMjM0NTY3ODEyMzQ1Njc4MTIzNDU2NzgxMjM0NTY3ODEyMzQ1Njc4MTIzNDU2NzgxMjM0NTY3ODEyMzQ1Njc4MTIzNDU2Nzg=
