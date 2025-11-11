@@ -1,11 +1,11 @@
 package com.example.order.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -13,10 +13,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class CreateOrderDTO {
 
-    private Long id;
+    @NotNull(message = "User ID cannot be null")
+    @Positive(message = "User ID must be positive")
     private Long userId;
-    private Long productId;
-    private Date createTime;
-    private Date updateTime;
 
+    private double totalPrice;
+    @NotEmpty(message = "Order must have at least one item")
+    private List<CreateOrderItemDTO> items;
 }
+

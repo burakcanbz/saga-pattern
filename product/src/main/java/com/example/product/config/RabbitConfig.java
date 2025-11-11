@@ -31,6 +31,6 @@ public class RabbitConfig {
     public Binding productBinding(Queue productCreatedQueue, DirectExchange productExchange) {
         return BindingBuilder.bind(productCreatedQueue)
                 .to(productExchange)
-                .with("product.create");  // Exact match
+                .with("product.create");
     }
 }

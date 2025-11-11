@@ -1,8 +1,10 @@
 package com.example.auth.service;
 
+import com.example.auth.dto.AuthRegisteredEventDTO;
 import com.example.auth.dto.LoginUserDTO;
 import com.example.auth.dto.RegisterUserDTO;
 import com.example.auth.entity.Auth;
+import com.example.auth.messaging.AuthPublisher;
 import com.example.auth.repository.AuthRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,12 +20,14 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthPublisher authPublisher;
 
     @Autowired
-    public AuthService(AuthRepository authRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(AuthRepository authRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  AuthPublisher authPublisher) {
         this.authRepository = authRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.authPublisher = authPublisher;
     }
 
     @Transactional
@@ -37,6 +41,12 @@ public class AuthService {
                 .email(registerUserDTO.getEmail())
                 .hashedPassword(passwordEncoder.encode(registerUserDTO.getPassword()))
                 .build();
+
+        authPublisher.publishUserRegistered(AuthRegisteredEventDTO.builder()
+                .email(registerUserDTO.getEmail())
+                .username(registerUserDTO.getUsername())
+                .hashedPassword(registerUserDTO.getPassword())
+                .build());
 
        return authRepository.save(newUser);
 
